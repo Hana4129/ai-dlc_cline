@@ -2,7 +2,7 @@
 # loop-start.sh — ループ開始時の初期化スクリプト
 # 使用方法: ./ai-dlc/dlc-scripts/loop-start.sh "<目標>" [ループ番号]
 
-set -euo pipefail
+set -u
 
 GOAL="${1:-}"
 LOOP_NUM="${2:-}"
@@ -78,7 +78,7 @@ LOOP_ENV_FILE=".loop-env"
 cat > "$LOOP_ENV_FILE" << EOF
 LOOP_NUM=${LOOP_NUM}
 LOOP_GOAL=${GOAL}
-LOOP_STARTED_AT=${TIMESTAMP}
+LOOP_STARTED_AT="${TIMESTAMP}"
 EOF
 
 echo "✅ Loop #${LOOP_NUM} を開始しました。"
