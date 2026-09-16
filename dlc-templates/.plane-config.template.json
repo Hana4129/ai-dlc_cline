@@ -1,0 +1,40 @@
+{
+  "_comment": "このファイルをプロジェクトルートに .plane-config.json としてコピーして使用してください。",
+  "_note": "トークンを含むため .gitignore に追加し、チームには .plane-config.example.json を共有してください。",
+
+  "plane": {
+    "baseUrl": "http://localhost",
+    "workspaceSlug": "hanaprojjcts",
+    "apiToken": "YOUR_PLANE_API_TOKEN_HERE"
+  },
+
+  "project": {
+    "_comment": "このリポジトリに対応するPlaneのプロジェクトスラッグを指定します。",
+    "slug": "YOUR_PROJECT_SLUG_HERE",
+    "_example": "例: plane上のURL http://localhost/hanaprojjcts/my-project/ の場合は my-project"
+  },
+
+  "labels": {
+    "_comment": "Plane上に作成済みのラベル名と一致させてください。",
+    "phases": {
+      "planning":       "phase:planning",
+      "implementation": "phase:implementation",
+      "verification":   "phase:verification",
+      "reflection":     "phase:reflection"
+    },
+    "types": {
+      "bug":     "type:bug",
+      "feature": "type:feature",
+      "chore":   "type:chore"
+    }
+  },
+
+  "issueDefaults": {
+    "_comment": "新規チケット作成時のデフォルト値。Plane上の状態名と一致させてください。",
+    "defaultState":    "Todo",
+    "inProgressState": "In Progress",
+    "doneState":       "Done",
+    "bugState":        "Todo",
+    "defaultPriority": "medium"
+  }
+}

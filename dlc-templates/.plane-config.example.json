@@ -1,0 +1,35 @@
+{
+  "_comment": "これはサンプルです。実際の値は .plane-config.json に記載し、gitignoreしてください。",
+
+  "plane": {
+    "baseUrl": "http://localhost",
+    "workspaceSlug": "hanaprojjcts",
+    "apiToken": "plane_api_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  },
+
+  "project": {
+    "slug": "my-project"
+  },
+
+  "labels": {
+    "phases": {
+      "planning":       "phase:planning",
+      "implementation": "phase:implementation",
+      "verification":   "phase:verification",
+      "reflection":     "phase:reflection"
+    },
+    "types": {
+      "bug":     "type:bug",
+      "feature": "type:feature",
+      "chore":   "type:chore"
+    }
+  },
+
+  "issueDefaults": {
+    "defaultState":    "Todo",
+    "inProgressState": "In Progress",
+    "doneState":       "Done",
+    "bugState":        "Todo",
+    "defaultPriority": "medium"
+  }
+}

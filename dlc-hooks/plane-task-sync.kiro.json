@@ -1,0 +1,22 @@
+{
+  "version": "v1",
+  "_comment": "このファイルを .kiro/hooks/plane-task-sync.json としてプロジェクトにコピーして使用してください。",
+  "hooks": [
+    {
+      "name": "Plane: タスク開始時にチケットを更新",
+      "trigger": "PreTaskExec",
+      "action": {
+        "type": "command",
+        "command": "bash ai-dlc/dlc-scripts/plane/hook-pre-task.sh"
+      }
+    },
+    {
+      "name": "Plane: タスク完了時にチケットを更新",
+      "trigger": "PostTaskExec",
+      "action": {
+        "type": "command",
+        "command": "bash ai-dlc/dlc-scripts/plane/hook-post-task.sh"
+      }
+    }
+  ]
+}

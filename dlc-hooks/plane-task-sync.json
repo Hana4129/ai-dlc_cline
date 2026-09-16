@@ -1,0 +1,21 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Plane: タスク開始時にチケットを更新",
+      "trigger": "PreTaskExec",
+      "action": {
+        "type": "command",
+        "command": "node -e \"\nconst fs = require('fs');\nconst path = require('path');\n\n// .plane-config.json が存在しない場合はスキップ\nconst configPath = path.join(process.cwd(), '.plane-config.json');\nif (!fs.existsSync(configPath)) {\n  process.stdout.write(JSON.stringify({ skip: true, reason: '.plane-config.json not found' }));\n  process.exit(0);\n}\n\n// stdin からClineのタスク情報を読み込む\nlet input = '';\nprocess.stdin.on('data', d => input += d);\nprocess.stdin.on('end', () => {\n  try {\n    const ctx = JSON.parse(input || '{}');\n    const taskTitle = (ctx.task && ctx.task.title) || '';\n\n    // チケットSeqIDをタスクタイトルから抽出: 例 '[#42]' or '#42'\n    const match = taskTitle.match(/#(\\\\d+)/);\n    if (!match) {\n      process.stdout.write(JSON.stringify({ skip: true, reason: 'No issue ID in task title' }));\n      process.exit(0);\n    }\n\n    const issueSeq = match[1];\n\n    // フェーズの判定（タスクタイトルから）\n    let phase = 'planning';\n    if (/実装|implement/i.test(taskTitle)) phase = 'implementation';\n    else if (/検証|verify|test/i.test(taskTitle)) phase = 'verification';\n    else if (/振り返り|reflect/i.test(taskTitle)) phase = 'reflection';\n\n    const { execSync } = require('child_process');\n    execSync(\n      `bash ai-dlc/dlc-scripts/plane/task-start.sh ${issueSeq} ${phase}`,\n      { stdio: 'inherit', cwd: process.cwd() }\n    );\n  } catch (e) {\n    // Plane連携失敗はループを止めない（警告のみ）\n    console.error('[plane hook] task-start failed:', e.message);\n  }\n  process.exit(0);\n});\n\""
+      }
+    },
+    {
+      "name": "Plane: タスク完了時にチケットを更新",
+      "trigger": "PostTaskExec",
+      "action": {
+        "type": "command",
+        "command": "node -e \"\nconst fs = require('fs');\nconst path = require('path');\n\n// .plane-config.json が存在しない場合はスキップ\nconst configPath = path.join(process.cwd(), '.plane-config.json');\nif (!fs.existsSync(configPath)) process.exit(0);\n\n// .loop-env からチケット情報を取得\nconst loopEnvPath = path.join(process.cwd(), '.loop-env');\nif (!fs.existsSync(loopEnvPath)) process.exit(0);\n\nconst loopEnv = fs.readFileSync(loopEnvPath, 'utf8');\nconst seqMatch = loopEnv.match(/PLANE_ISSUE_SEQ=(\\\\d+)/);\nif (!seqMatch) process.exit(0);\n\nconst issueSeq = seqMatch[1];\n\nlet input = '';\nprocess.stdin.on('data', d => input += d);\nprocess.stdin.on('end', () => {\n  try {\n    const ctx = JSON.parse(input || '{}');\n    // タスクの成否を判定\n    const status = (ctx.task && ctx.task.status === 'completed') ? 'success' : 'partial';\n\n    const { execSync } = require('child_process');\n    execSync(\n      `bash ai-dlc/dlc-scripts/plane/task-end.sh ${issueSeq} ${status}`,\n      { stdio: 'inherit', cwd: process.cwd() }\n    );\n  } catch (e) {\n    console.error('[plane hook] task-end failed:', e.message);\n  }\n  process.exit(0);\n});\n\""
+      }
+    }
+  ]
+}
