@@ -65,7 +65,7 @@ ai-dlc/
 ### 1. サブモジュールとして追加
 
 ```bash
-git submodule add https://github.com/<org>/ai-dlc.git ai-dlc
+git submodule add https://github.com/Hana4129/ai-dlc_cline.git ai-dlc
 git submodule update --init --recursive
 ```
 
