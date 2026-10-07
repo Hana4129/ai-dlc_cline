@@ -19,6 +19,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/lib.sh"
+source "${SCRIPT_DIR}/../loop-env.sh"
 
 TITLE="${1:-}"
 DESCRIPTION="${2:-}"
@@ -55,16 +56,22 @@ plane_load_config || exit 1
 LOOP_NUM=""
 CURRENT_PHASE="unknown"
 PARENT_ISSUE_ID=""
+PLANE_ISSUE_ID=""
+PLANE_ISSUE_SEQ=""
 
 if [[ -f "$LOOP_ENV_FILE" ]]; then
-  # shellcheck disable=SC1090
-  source "$LOOP_ENV_FILE" 2>/dev/null || true
-  LOOP_NUM="${LOOP_NUM:-}"
-  CURRENT_PHASE="${PLANE_CURRENT_PHASE:-unknown}"
+  LOOP_NUM=$(loop_env_get LOOP_NUM "$LOOP_ENV_FILE")
+  CURRENT_PHASE=$(loop_env_get PLANE_CURRENT_PHASE "$LOOP_ENV_FILE")
+  PLANE_ISSUE_ID=$(loop_env_get PLANE_ISSUE_ID "$LOOP_ENV_FILE")
+  PLANE_ISSUE_SEQ=$(loop_env_get PLANE_ISSUE_SEQ "$LOOP_ENV_FILE")
 fi
 
 if [[ -z "$LOOP_NUM" && -f "loop-log.md" ]]; then
-  LOOP_NUM=$(grep -oP '(?<=## Loop #)\d+' "loop-log.md" | tail -1)
+  LOOP_NUM=$(grep -Eo '^## Loop #[0-9]+' "loop-log.md" | tail -1 | sed -E 's/^## Loop #//')
+fi
+
+if [[ -z "$CURRENT_PHASE" ]]; then
+  CURRENT_PHASE="unknown"
 fi
 
 # 発見元チケットIDの解決

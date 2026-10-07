@@ -33,14 +33,14 @@
 
 ```bash
 # プロジェクトルートで実行
-git submodule add https://github.com/<org>/ai-dlc.git ai-dlc
+git submodule add https://github.com/Hana4129/ai-dlc_cline.git ai-dlc
 git submodule update --init --recursive
 ```
 
 または install.sh を使う場合：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/<org>/ai-dlc/main/dlc-scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Hana4129/ai-dlc_cline/main/dlc-scripts/install.sh | bash
 ```
 
 ### ステップ 2: プロジェクト固有ルールを設定
@@ -72,14 +72,10 @@ Cline が読む `.clinerules/` ディレクトリは以下の構成になって�
 └── 99_local.md          ← あなたが編集するファイル
 ```
 
-**サブモジュール方式**の場合、汎用ルールは `ai-dlc/.clinerules/` にあります。
-Clineに認識させるため、プロジェクト側の `.clinerules/` にシンボリックリンクまたはコピーを配置してください。
+`install.sh` は汎用ルールをプロジェクト側の `.clinerules/` にコピーします。既存ファイルは上書きしないため、`ai-dlc` 更新後に汎用ルールも更新する場合は次を実行してください。
 
 ```bash
-# シンボリックリンクで参照する例（Linux/macOS）
-for f in ai-dlc/.clinerules/0*.md; do
-  ln -sf "../../${f}" ".clinerules/$(basename $f)"
-done
+cp ai-dlc/.clinerules/0*.md .clinerules/
 ```
 
 ### ステップ 4: コミット

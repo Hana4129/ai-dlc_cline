@@ -17,6 +17,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/lib.sh"
+source "${SCRIPT_DIR}/../loop-env.sh"
 
 ISSUE_SEQ="${1:-}"
 STATUS="${2:-}"
@@ -53,9 +54,7 @@ plane_load_config || exit 1
 # ----------------------------------------------------------------
 ISSUE_ID=""
 if [[ -f "$LOOP_ENV_FILE" ]]; then
-  # shellcheck disable=SC1090
-  source "$LOOP_ENV_FILE" 2>/dev/null || true
-  ISSUE_ID="${PLANE_ISSUE_ID:-}"
+  ISSUE_ID=$(loop_env_get PLANE_ISSUE_ID "$LOOP_ENV_FILE")
 fi
 
 if [[ -z "$ISSUE_ID" ]]; then
@@ -93,8 +92,11 @@ esac
 # 終了コメントを追加
 # ----------------------------------------------------------------
 LOOP_NUM="${LOOP_NUM:-}"
+if [[ -z "$LOOP_NUM" && -f "$LOOP_ENV_FILE" ]]; then
+  LOOP_NUM=$(loop_env_get LOOP_NUM "$LOOP_ENV_FILE")
+fi
 if [[ -z "$LOOP_NUM" && -f "loop-log.md" ]]; then
-  LOOP_NUM=$(grep -oP '(?<=## Loop #)\d+' "loop-log.md" | tail -1)
+  LOOP_NUM=$(grep -Eo '^## Loop #[0-9]+' "loop-log.md" | tail -1 | sed -E 's/^## Loop #//')
 fi
 
 COMMENT="🏁 Loop ${LOOP_NUM:+#${LOOP_NUM} }終了: ${STATUS_LABEL} | フェーズ [${NEXT_PHASE}] | ${TIMESTAMP}"

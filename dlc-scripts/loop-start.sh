@@ -19,12 +19,17 @@ if [[ -z "$GOAL" ]]; then
   exit 1
 fi
 
+if [[ -n "$LOOP_NUM" && ! "$LOOP_NUM" =~ ^[0-9]+$ ]]; then
+  echo "❌ エラー: ループ番号は整数で指定してください。"
+  exit 1
+fi
+
 # ----------------------------------------------------------------
 # ループ番号の自動採番
 # ----------------------------------------------------------------
 if [[ -z "$LOOP_NUM" ]]; then
   if [[ -f "$LOG_FILE" ]]; then
-    LAST_NUM=$(grep -oP '(?<=## Loop #)\d+' "$LOG_FILE" | tail -1)
+    LAST_NUM=$(grep -Eo '^## Loop #[0-9]+' "$LOG_FILE" | tail -1 | sed -E 's/^## Loop #//')
     LOOP_NUM=$(( ${LAST_NUM:-0} + 1 ))
   else
     LOOP_NUM=1
@@ -75,11 +80,10 @@ EOF
 # 環境変数ファイルの出力（Clineが参照できるよう）
 # ----------------------------------------------------------------
 LOOP_ENV_FILE=".loop-env"
-cat > "$LOOP_ENV_FILE" << EOF
-LOOP_NUM=${LOOP_NUM}
-LOOP_GOAL=${GOAL}
-LOOP_STARTED_AT="${TIMESTAMP}"
-EOF
+printf -v GOAL_ESCAPED '%q' "$GOAL"
+printf -v TIMESTAMP_ESCAPED '%q' "$TIMESTAMP"
+printf 'LOOP_NUM=%s\nLOOP_GOAL=%s\nLOOP_STARTED_AT=%s\n' \
+  "$LOOP_NUM" "$GOAL_ESCAPED" "$TIMESTAMP_ESCAPED" > "$LOOP_ENV_FILE"
 
 echo "✅ Loop #${LOOP_NUM} を開始しました。"
 echo "   目標: ${GOAL}"

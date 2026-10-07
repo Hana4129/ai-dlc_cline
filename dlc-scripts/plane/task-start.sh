@@ -15,6 +15,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/lib.sh"
+source "${SCRIPT_DIR}/../loop-env.sh"
 
 ISSUE_SEQ="${1:-}"
 PHASE="${2:-planning}"
@@ -62,11 +63,10 @@ plane_set_phase_label "$ISSUE_ID" "$PHASE"
 # ループ番号の取得（loop-log.md から）
 LOOP_NUM=""
 if [[ -f ".loop-env" ]]; then
-  # shellcheck disable=SC1090
-  source ".loop-env" 2>/dev/null || true
+  LOOP_NUM=$(loop_env_get LOOP_NUM ".loop-env")
 fi
 if [[ -z "${LOOP_NUM:-}" && -f "loop-log.md" ]]; then
-  LOOP_NUM=$(grep -oP '(?<=## Loop #)\d+' "loop-log.md" | tail -1)
+  LOOP_NUM=$(grep -Eo '^## Loop #[0-9]+' "loop-log.md" | tail -1 | sed -E 's/^## Loop #//')
 fi
 
 COMMENT="🚀 Loop ${LOOP_NUM:+#${LOOP_NUM} }開始: フェーズ [${PHASE}] | ${TIMESTAMP}"

@@ -3,7 +3,7 @@
 #
 # 使用方法:
 #   # サブモジュールとして追加（推奨）
-#   curl -fsSL https://raw.githubusercontent.com/<org>/ai-dlc/main/dlc-scripts/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/Hana4129/ai-dlc_cline/main/dlc-scripts/install.sh | bash
 #
 #   # またはローカルで直接実行
 #   ./ai-dlc/dlc-scripts/install.sh [オプション]
@@ -18,7 +18,7 @@ set -euo pipefail
 # ----------------------------------------------------------------
 # デフォルト設定
 # ----------------------------------------------------------------
-AI_DLC_REPO="${AI_DLC_REPO:-https://github.com/<org>/ai-dlc.git}"
+AI_DLC_REPO="${AI_DLC_REPO:-https://github.com/Hana4129/ai-dlc_cline.git}"
 AI_DLC_BRANCH="${AI_DLC_BRANCH:-main}"
 USE_SUBMODULE=true
 SUBMODULE_PATH="ai-dlc"
@@ -102,6 +102,26 @@ install_as_copy() {
 # ----------------------------------------------------------------
 setup_clinerules() {
   mkdir -p "$CLINERULES_DIR"
+
+  RULES_SOURCE="${SUBMODULE_PATH}/.clinerules"
+  if [[ ! -d "$RULES_SOURCE" && -d "${CLINERULES_DIR}/base" ]]; then
+    RULES_SOURCE="${CLINERULES_DIR}/base"
+  fi
+
+  if [[ -d "$RULES_SOURCE" ]]; then
+    for RULE_FILE in "$RULES_SOURCE"/0*.md; do
+      [[ -f "$RULE_FILE" ]] || continue
+      RULE_TARGET="${CLINERULES_DIR}/$(basename "$RULE_FILE")"
+      if [[ ! -e "$RULE_TARGET" ]]; then
+        cp "$RULE_FILE" "$RULE_TARGET"
+        success "汎用ルールを配置しました: ${RULE_TARGET}"
+      else
+        warn "${RULE_TARGET} は既に存在します。上書きせずスキップします。"
+      fi
+    done
+  else
+    warn "汎用ルールが見つかりません: ${RULES_SOURCE}"
+  fi
 
   # ローカルルールファイルがなければテンプレートから生成
   if [[ ! -f "$LOCAL_RULES_FILE" ]]; then
